@@ -46,11 +46,15 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
 }
 
 function HydrationSafeTimestamp({ timestamp }: { timestamp: string }) {
-  const [timeAgo, setTimeAgo] = useState('...');
+  const [timeAgo, setTimeAgo] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeAgo(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
   }, [timestamp]);
+
+  if (!timeAgo) {
+    return null;
+  }
 
   return <>{timeAgo}</>;
 }
