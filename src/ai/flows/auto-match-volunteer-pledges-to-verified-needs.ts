@@ -72,9 +72,8 @@ const autoMatchFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    // Add a random confidence score between 0.7 and 0.95 to the output
-    const confidenceScore = Math.random() * (0.95 - 0.7) + 0.7;
+    // Use a static value to avoid hydration errors caused by Math.random()
+    const confidenceScore = 0.85;
     return { ...output!, confidenceScore };
   }
 );
-
