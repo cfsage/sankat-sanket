@@ -19,6 +19,7 @@ import {
   Shield,
   Settings,
   HelpCircle,
+  User,
 } from 'lucide-react';
 
 const menuItems = [
@@ -60,6 +61,14 @@ export default function AppSidebar() {
       </SidebarMenu>
       <SidebarFooter>
         <SidebarMenu>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Profile" isActive={pathname === '/dashboard/profile'}>
+              <Link href="/dashboard/profile">
+                <User />
+                <span>Profile</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Settings">
               <Link href="#">
