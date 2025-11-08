@@ -38,7 +38,7 @@ export default function AppSidebar() {
         <Link href="/dashboard" className="flex items-center gap-2">
           <Logo className="h-8 w-8 text-sidebar-primary" />
           <span className="font-headline text-xl font-bold text-sidebar-foreground">
-            Resilient Echo
+            Sahayata
           </span>
         </Link>
       </SidebarHeader>

@@ -27,7 +27,7 @@ export default function AppHeader() {
       
       <Link href="/dashboard" className="hidden items-center gap-2 md:flex">
         <Logo className="h-6 w-6 text-primary" />
-        <span className="font-headline text-lg font-bold">Resilient Echo</span>
+        <span className="font-headline text-lg font-bold">Sahayata</span>
       </Link>
 
       <div className="flex-1"></div>
@@ -46,7 +46,7 @@ export default function AppHeader() {
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">Demo User</p>
               <p className="text-xs leading-none text-muted-foreground">
-                user@resilientecho.org
+                user@sahayata.org
               </p>
             </div>
           </DropdownMenuLabel>

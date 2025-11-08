@@ -4,8 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Resilient Echo",
-  description: "Crowdsourced Climate Resilience Network – Report. Alert. Match. Recover.",
+  title: "Sahayata",
+  description: "Community-driven climate resilience network in Nepal.",
 };
 
 export default function RootLayout({

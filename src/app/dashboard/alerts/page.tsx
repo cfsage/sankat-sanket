@@ -35,7 +35,7 @@ export default function AlertsPage() {
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
-            Recent alerts and updates from the Resilient Echo network.
+            Recent alerts and updates from the Sahayata network.
           </CardDescription>
         </CardHeader>
         <CardContent>
