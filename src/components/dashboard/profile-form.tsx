@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button asshadcn } from '../ui/button';
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -48,7 +47,7 @@ export default function ProfileForm() {
                 <AvatarImage src="https://picsum.photos/seed/avatar/200/200" alt="@user" />
                 <AvatarFallback>DU</AvatarFallback>
             </Avatar>
-            <Buttonshadcn variant="outline">Change Photo</Buttonshadcn>
+            <Button variant="outline">Change Photo</Button>
         </div>
 
         <FormField
