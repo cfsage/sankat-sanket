@@ -92,6 +92,16 @@ body {
 }
 
 @layer components {
+  .leaflet-popup-content-wrapper {
+      @apply bg-card text-card-foreground rounded-lg shadow-lg border-0;
+  }
+  .leaflet-popup-content {
+      @apply m-0;
+  }
+  .leaflet-popup-tip {
+      @apply bg-card;
+  }
+
   .pulse-marker {
     animation: pulse 2s infinite;
   }
@@ -99,15 +109,15 @@ body {
   @keyframes pulse {
     0% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.7);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
     }
     70% {
       transform: scale(1);
-      box-shadow: 0 0 0 10px rgba(255, 140, 0, 0);
+      box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
     }
     100% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
     }
   }
 }
