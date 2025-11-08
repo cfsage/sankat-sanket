@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import type { Incident, Pledge } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -12,6 +11,7 @@ import { Siren, HandHeart } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 interface MapComponentProps {
+  center: [number, number];
   incidents: Incident[];
   pledges: Pledge[];
 }
@@ -38,9 +38,7 @@ const createIcon = (type: 'incident' | 'pledge', severity?: 'Low' | 'Medium' | '
 };
 
 
-export default function MapComponent({ incidents, pledges }: MapComponentProps) {
-  const center: L.LatLngExpression = [34.0522, -118.2437];
-
+export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">
         <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
@@ -51,7 +49,7 @@ export default function MapComponent({ incidents, pledges }: MapComponentProps) 
             {incidents.map((incident) => (
                 <Marker
                     key={incident.id}
-                    position={incident.location}
+                    position={[incident.location.lat, incident.location.lng]}
                     icon={createIcon('incident', incident.severity)}
                 >
                     <Popup maxWidth={350}>
@@ -82,7 +80,7 @@ export default function MapComponent({ incidents, pledges }: MapComponentProps) 
             {pledges.map((pledge) => (
                 <Marker
                     key={pledge.id}
-                    position={pledge.location}
+                    position={[pledge.location.lat, pledge.location.lng]}
                     icon={createIcon('pledge')}
                 >
                      <Popup maxWidth={350}>
