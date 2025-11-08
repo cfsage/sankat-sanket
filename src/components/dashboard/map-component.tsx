@@ -48,21 +48,13 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
 }
 
 export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
-  const [isMounted, setIsMounted] = useState(false);
   const [clientNow, setClientNow] = useState(() => new Date());
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => setClientNow(new Date()), 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  if (!isMounted) {
-    return <div className="h-full w-full bg-muted animate-pulse rounded-lg"></div>;
-  }
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">

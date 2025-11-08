@@ -2,13 +2,19 @@
 
 import type { Incident, Pledge } from '@/lib/data';
 import { useEffect, useState } from 'react';
-import { ClientOnly } from '../client-only';
-import MapComponent from './map-component';
+import dynamic from 'next/dynamic';
 
 interface MapContainerProps {
   incidents: Incident[];
   pledges: Pledge[];
 }
+
+// Dynamically import MapComponent with SSR disabled
+const MapComponent = dynamic(() => import('./map-component'), { 
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-muted animate-pulse rounded-lg"></div>
+});
+
 
 export default function MapContainer({ incidents, pledges }: MapContainerProps) {
   const [center, setCenter] = useState<[number, number]>([34.0522, -118.2437]); // default center (LA)
@@ -29,9 +35,7 @@ export default function MapContainer({ incidents, pledges }: MapContainerProps) 
 
   return (
     <div className="h-full w-full">
-      <ClientOnly>
         <MapComponent center={center} incidents={incidents} pledges={pledges} />
-      </ClientOnly>
     </div>
   );
 }
