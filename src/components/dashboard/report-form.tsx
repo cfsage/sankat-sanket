@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { handleReportAnalysis } from '@/app/dashboard/report/actions';
 import AnalysisResults from './analysis-results';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, LocateFixed } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 const reportSchema = z.object({
   photo: z.any().refine(file => file?.length === 1, "A photo is required."),
@@ -35,13 +36,47 @@ export default function ReportForm() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResultData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
   });
 
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          setLocationError("Could not get your location. Please enable location services in your browser settings. Using a default location for now.");
+          // Fallback to a default location if user denies permission
+          setLocation({ latitude: 34.0522, longitude: -118.2437 });
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by this browser. Using a default location.");
+      setLocation({ latitude: 34.0522, longitude: -118.2437 });
+    }
+  }, []);
+
   const onSubmit = async (data: ReportFormValues) => {
+    if (!location) {
+        toast({
+            variant: "destructive",
+            title: "Location not available",
+            description: "We couldn't determine your location. Please ensure location services are enabled.",
+        });
+        return;
+    }
+      
     setIsSubmitting(true);
     setAnalysisResult(null);
 
@@ -59,7 +94,7 @@ export default function ReportForm() {
             photoDataUri,
             audioDataUri,
             textDescription: data.textDescription,
-            geolocation: { latitude: 34.0522, longitude: -118.2437 } // Mocked
+            geolocation: location
         });
         
         if (result.error) {
@@ -105,6 +140,13 @@ export default function ReportForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {locationError && (
+            <Alert variant="destructive">
+                <LocateFixed className="h-4 w-4" />
+                <AlertTitle>Location Error</AlertTitle>
+                <AlertDescription>{locationError}</AlertDescription>
+            </Alert>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
                 <FormField
@@ -181,7 +223,7 @@ export default function ReportForm() {
         </div>
 
         <div className="flex justify-end gap-4">
-            <Button type="submit" size="lg">
+            <Button type="submit" size="lg" disabled={!location}>
                 <Upload className="mr-2 h-4 w-4" />
                 Analyze Report
             </Button>
