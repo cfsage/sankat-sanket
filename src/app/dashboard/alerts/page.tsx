@@ -23,11 +23,15 @@ const colorMap: { [key: string]: string } = {
 }
 
 function AlertTimestamp({ timestamp }: { timestamp: string }) {
-  const [timeAgo, setTimeAgo] = useState('...');
+  const [timeAgo, setTimeAgo] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeAgo(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
   }, [timestamp]);
+
+  if (!timeAgo) {
+    return null;
+  }
 
   return <p className="text-xs text-muted-foreground">{timeAgo}</p>;
 }
