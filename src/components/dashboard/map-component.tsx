@@ -7,7 +7,6 @@ import { Badge } from '../ui/badge';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Siren, HandHeart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface MapComponentProps {
@@ -46,14 +45,18 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null;
 }
 
-export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
-  const [clientNow, setClientNow] = useState<Date | null>(null);
+function HydrationSafeTimestamp({ timestamp }: { timestamp: string }) {
+  const [timeAgo, setTimeAgo] = useState('...');
 
   useEffect(() => {
-    setClientNow(new Date());
-    const interval = setInterval(() => setClientNow(new Date()), 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+    setTimeAgo(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
+  }, [timestamp]);
+
+  return <>{timeAgo}</>;
+}
+
+
+export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">
@@ -82,10 +85,7 @@ export default function MapComponent({ center, incidents, pledges }: MapComponen
                     {incident.type} Report
                   </CardTitle>
                   <CardDescription>
-                    {clientNow ? formatDistanceToNow(new Date(incident.timestamp), {
-                      addSuffix: true,
-                      now: clientNow,
-                    }) : '...'}
+                    <HydrationSafeTimestamp timestamp={incident.timestamp} />
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
