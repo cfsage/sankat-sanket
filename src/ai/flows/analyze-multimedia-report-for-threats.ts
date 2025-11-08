@@ -28,6 +28,7 @@ const AnalyzeMultimediaReportInputSchema = z.object({
       latitude: z.number().describe('Latitude of the event location.'),
       longitude: z.number().describe('Longitude of the event location.'),
     })
+    .optional()
     .describe('Geolocation of the event.'),
 });
 export type AnalyzeMultimediaReportInput = z.infer<typeof AnalyzeMultimediaReportInputSchema>;
@@ -67,7 +68,9 @@ const analyzeMultimediaReportPrompt = ai.definePrompt({
   {{#if textDescription}}
   Description: {{{textDescription}}}
   {{/if}}
+  {{#if geolocation}}
   Geolocation: Latitude: {{{geolocation.latitude}}}, Longitude: {{{geolocation.longitude}}}
+  {{/if}}
 
   Output the threats, needs, and confidence score in JSON format.
   `,

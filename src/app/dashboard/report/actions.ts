@@ -22,8 +22,8 @@ export async function handleReportAnalysis(input: AnalyzeMultimediaReportInput):
         const matches = await autoMatchVolunteerPledgesToVerifiedNeeds({
             reportId: `report-1720000000000`, // Using a static ID to prevent hydration issues
             reportType: analysis.threats[0] || 'Unknown',
-            latitude: input.geolocation.latitude,
-            longitude: input.geolocation.longitude,
+            latitude: input.geolocation?.latitude || 0,
+            longitude: input.geolocation?.longitude || 0,
             needs: analysis.needs,
         });
 
