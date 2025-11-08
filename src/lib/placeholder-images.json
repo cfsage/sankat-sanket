@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Dramatic view of a storm gathering over a forested valley, symbolizing resilience.",
+      "imageUrl": "https://images.unsplash.com/photo-1651347814597-1bc35bec0af0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxzdG9ybXklMjBmb3Jlc3R8ZW58MHx8fHwxNzYyNTc3NzMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stormy forest"
+    },
+    {
+      "id": "map-fallback",
+      "description": "A static, stylized map image to be used as a fallback when the interactive map cannot be loaded.",
+      "imageUrl": "https://images.unsplash.com/photo-1603466183710-70b84997a93f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc2MjQ5OTIzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city map"
+    },
+    {
+      "id": "default-report-photo",
+      "description": "Default placeholder for photo uploads in incident reports.",
+      "imageUrl": "https://images.unsplash.com/photo-1727621170047-4b34851bf8b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjYW1lcmElMjBsZW5zfGVufDB8fHx8MTc2MjUxMjU2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camera lens"
+    },
+    {
+      "id": "default-audio-photo",
+      "description": "Default placeholder for audio uploads in incident reports.",
+      "imageUrl": "https://images.unsplash.com/photo-1659083725992-9d88c12e719c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaWNyb3Bob25lJTIwd2F2ZXxlbnwwfHx8fDE3NjI1Nzc3MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "microphone wave"
+    }
+  ]
 }
