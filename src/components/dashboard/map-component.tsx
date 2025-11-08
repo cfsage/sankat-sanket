@@ -41,7 +41,7 @@ const createIcon = (type: 'incident' | 'pledge', severity?: 'Low' | 'Medium' | '
 export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">
-        <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
+        <MapContainer center={center} zoom={10} scrollWheelZoom={false} className="h-full w-full" attributionControl={false}>
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
