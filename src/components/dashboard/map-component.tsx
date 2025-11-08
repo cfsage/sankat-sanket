@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import type { Incident, Pledge } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -17,7 +17,6 @@ interface MapComponentProps {
   pledges: Pledge[];
 }
 
-// Client-only hook to generate Leaflet icons
 const useLeafletIcon = (type: 'incident' | 'pledge', severity?: 'Low' | 'Medium' | 'High') => {
   return useMemo(() => {
     const isHighSeverity = type === 'incident' && severity === 'High';
@@ -42,25 +41,38 @@ const useLeafletIcon = (type: 'incident' | 'pledge', severity?: 'Low' | 'Medium'
   }, [type, severity]);
 };
 
+function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap();
+  map.setView(center, zoom);
+  return null;
+}
+
 export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [clientNow, setClientNow] = useState(() => new Date());
 
-  // Update "time ago" every minute
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => setClientNow(new Date()), 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
+  if (!isMounted) {
+    return <div className="h-full w-full bg-muted animate-pulse rounded-lg"></div>;
+  }
+
   return (
     <div className="h-full w-full rounded-lg overflow-hidden">
       <MapContainer
-        key={JSON.stringify(center)} // force remount on center change
         center={center}
         zoom={10}
-        scrollWheelZoom={false}
         className="h-full w-full"
         attributionControl={false}
       >
+        <ChangeView center={center} zoom={10} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         {incidents.map((incident) => {
