@@ -2,7 +2,7 @@
 
 import { alerts } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Siren, HandHeart, Wind } from "lucide-react";
+import { Bell, Siren, Wind } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from "@/lib/utils";
@@ -22,13 +22,18 @@ const colorMap: { [key: string]: string } = {
     Default: 'bg-primary'
 }
 
-export default function AlertsPage() {
-  const [isClient, setIsClient] = useState(false);
+function AlertTimestamp({ timestamp }: { timestamp: string }) {
+  const [timeAgo, setTimeAgo] = useState('...');
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setTimeAgo(formatDistanceToNow(new Date(timestamp), { addSuffix: true }));
+  }, [timestamp]);
 
+  return <p className="text-xs text-muted-foreground">{timeAgo}</p>;
+}
+
+
+export default function AlertsPage() {
   return (
     <div className="flex justify-center items-start">
       <Card className="w-full max-w-4xl shadow-lg">
@@ -55,13 +60,7 @@ export default function AlertsPage() {
                 <div className="flex-1">
                     <div className="flex justify-between items-baseline">
                         <h4 className="font-semibold">{alert.title}</h4>
-                        {isClient ? (
-                          <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">...</p>
-                        )}
+                        <AlertTimestamp timestamp={alert.timestamp} />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>
                 </div>
