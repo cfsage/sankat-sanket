@@ -2,11 +2,7 @@
 
 import type { Incident, Pledge } from '@/lib/data';
 import dynamic from 'next/dynamic';
-
-const MapComponent = dynamic(() => import('./map-component'), { 
-    ssr: false,
-    loading: () => <div className="h-full w-full bg-muted animate-pulse"></div> 
-});
+import { useMemo } from 'react';
 
 interface MapContainerProps {
   incidents: Incident[];
@@ -14,6 +10,11 @@ interface MapContainerProps {
 }
 
 export default function MapContainer({ incidents, pledges }: MapContainerProps) {
+  const MapComponent = useMemo(() => dynamic(() => import('./map-component'), { 
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-muted animate-pulse"></div> 
+  }), []);
+
   return (
     <div className="h-full w-full">
       <MapComponent incidents={incidents} pledges={pledges} />
