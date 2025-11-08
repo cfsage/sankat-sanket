@@ -55,9 +55,13 @@ export default function AlertsPage() {
                 <div className="flex-1">
                     <div className="flex justify-between items-baseline">
                         <h4 className="font-semibold">{alert.title}</h4>
-                        <p className="text-xs text-muted-foreground">
-                            {isClient ? formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true }) : ''}
-                        </p>
+                        {isClient ? (
+                          <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">...</p>
+                        )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>
                 </div>

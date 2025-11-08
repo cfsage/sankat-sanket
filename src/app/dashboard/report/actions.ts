@@ -20,7 +20,7 @@ export async function handleReportAnalysis(input: AnalyzeMultimediaReportInput):
 
         // 2. Use the identified needs to find matching volunteer pledges.
         const matches = await autoMatchVolunteerPledgesToVerifiedNeeds({
-            reportId: `report-${Date.now()}`,
+            reportId: `report-1720000000000`, // Using a static ID to prevent hydration issues
             reportType: analysis.threats[0] || 'Unknown',
             latitude: input.geolocation.latitude,
             longitude: input.geolocation.longitude,
