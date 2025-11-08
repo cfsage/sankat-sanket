@@ -1,9 +1,12 @@
+'use client';
+
 import { alerts } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, Siren, HandHeart, Wind } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 const iconMap = {
   Flood: <Siren className="h-5 w-5" />,
@@ -20,6 +23,12 @@ const colorMap: { [key: string]: string } = {
 }
 
 export default function AlertsPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <div className="flex justify-center items-start">
       <Card className="w-full max-w-4xl shadow-lg">
@@ -47,7 +56,7 @@ export default function AlertsPage() {
                     <div className="flex justify-between items-baseline">
                         <h4 className="font-semibold">{alert.title}</h4>
                         <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                            {isClient ? formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true }) : ''}
                         </p>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>

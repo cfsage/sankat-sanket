@@ -48,9 +48,10 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
 }
 
 export default function MapComponent({ center, incidents, pledges }: MapComponentProps) {
-  const [clientNow, setClientNow] = useState(() => new Date());
+  const [clientNow, setClientNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    setClientNow(new Date());
     const interval = setInterval(() => setClientNow(new Date()), 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -86,9 +87,9 @@ export default function MapComponent({ center, incidents, pledges }: MapComponen
                       {incident.type} Report
                     </CardTitle>
                     <CardDescription>
-                      {formatDistanceToNow(new Date(incident.timestamp), {
+                      {clientNow && formatDistanceToNow(new Date(incident.timestamp), {
                         addSuffix: true,
-                        now: clientNow.getTime(),
+                        now: clientNow,
                       })}
                     </CardDescription>
                   </CardHeader>
