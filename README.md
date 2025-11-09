@@ -1,49 +1,44 @@
-# Sankat Sanket
+# Sankat Sanket  
+**Fully Open-Source | Zero-Cost | Community-Powered Climate Resilience Network**
 
-From a voice in the dark — to a task in a hand.
+> _From a voice in the dark — to a task in a hand._
 
-This is a Next.js application for community-driven climate resilience.
+---
 
-To get started, open `src/app/page.tsx` and `http://localhost:9002/`.
+## 📖 About the Project
+**Sankat Sanket** is a global, open-source initiative to build a **community-driven climate resilience network** — with **no paid APIs**, **no cloud bills**, and **no barriers to access**.
 
-## Supabase Setup
+Anyone can report a disaster by capturing a short **photo** or **audio clip**, even without internet. 
 
-1. Environment variables
-   - Create a `.env.local` in the project root with:
-     - `NEXT_PUBLIC_SUPABASE_URL=your-project-url`
-     - `NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key`
-     - Optional server-side: `SUPABASE_SERVICE_ROLE_KEY=your-service-role-key` (used by notification API)
-     - Optional Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
+On-device AI detects threats like **floods, storms, or fires** and sends **real-time alerts** to nearby users via **voice, text, or emoji notifications**.
 
-2. Install dependencies
-   - `npm install @supabase/supabase-js`
+Local **volunteers and businesses** can pledge rooms, meals, or supplies.  
+AI then matches every reported need with nearby help, and each act of aid is tracked and rewarded with **Resilience Badges**, promoting trust, transparency, and collaboration.
 
-3. Database schema & RLS policies
-   - In the Supabase dashboard → SQL editor, copy and run `docs/supabase.sql`.
-   - This creates `users`, `teams`, `incidents`, and `tasks` tables with row-level security policies.
+---
 
-4. Storage bucket (optional)
-   - Create a bucket `incident-photos` and configure storage policies to allow uploads for public reporting use cases.
+## 💡 Mission
+To build a **free, open, and decentralized disaster response network** — powered entirely by **people, phones, and open technology**.
 
- 5. Using the client
-   - Import `getSupabaseClient` from `src/lib/supabase.ts` in your components or pages.
-   - Example:
-     ```ts
-     import { getSupabaseClient } from '@/lib/supabase';
-     const supabase = getSupabaseClient();
-     ```
+---
 
- 6. Auth & roles
-   - On first login, insert a row in `public.users` with the user’s `id` and desired `role` (`public`, `volunteer`, `org`, `team-member`).
-   - RLS policies rely on `auth.uid()` and `public.users.role` to gate actions.
-   - Task creation is client-side via Supabase with RLS, so only `org` can create and manage tasks.
+## 🚀 Key Features
+- 📸 **Smart Crisis Reporting:** Photo or audio-based disaster detection (on-device AI)  
+- 🔔 **Instant Local Alerts:** Voice, text, and emoji notifications in multiple languages  
+- 🏅 **Resilience Badges:** Recognition system for verified contributions  
+- 🌐 **Offline First:** Works in low-connectivity disaster zones  
+- 💬 **Open Collaboration:** 100% open-source and community-driven  
 
-7. Storage policies (incident photos)
-   - Create a bucket `incident-photos` and add a policy that allows authenticated users to upload and read images; optionally allow public read for demo purposes.
-   - Example policy (adjust to your requirements):
-     - Insert: authenticated users can upload to `incident-photos/*`.
-     - Select: public read or authenticated read depending on privacy needs.
+---
 
-8. Map tiles configuration
-   - Set `NEXT_PUBLIC_MAP_TILES_URL` to your preferred tile provider; components fall back to OpenStreetMap when unset.
-   - `LiveMap`, `TaskMiniMap`, and `MapPicker` respect this env for consistency.
+## 🧩 How It Works
+1. **Report:** Capture photo/audio + location  
+2. **Detect:** On-device AI identifies disaster type & urgency  
+3. **Alert:** Real-time localized notifications  
+4. **Respond:** Volunteers & businesses pledge aid  
+5. **Match:** AI connects needs with resources  
+6. **Reward:** Earn Resilience Badges for verified help  
+
+---
+
+## ⚙️ Installation (Coming Soon)
