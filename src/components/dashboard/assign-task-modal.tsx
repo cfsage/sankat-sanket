@@ -14,6 +14,7 @@ type Props = {
 };
 
 type Team = { id: string; name: string };
+type Member = { user_id: string; role: string };
 
 export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props) {
   const { toast } = useToast();
@@ -22,6 +23,8 @@ export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props)
   const [open, setOpen] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<string | undefined>(undefined);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,13 +39,33 @@ export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props)
     })();
   }, [supabase]);
 
+  useEffect(() => {
+    if (!supabase || !selectedTeam) {
+      setMembers([]);
+      setSelectedMember(undefined);
+      return;
+    }
+    (async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('user_id, role')
+        .eq('team_id', selectedTeam)
+        .order('role');
+      if (error) {
+        toast({ variant: 'destructive', title: 'Load members failed', description: error.message });
+      } else {
+        setMembers((data ?? []) as Member[]);
+      }
+    })();
+  }, [supabase, selectedTeam]);
+
   const assign = async () => {
     if (!supabase || !selectedTeam) return;
     try {
       setLoading(true);
       const { error } = await supabase
         .from('tasks')
-        .update({ status: 'assigned', assigned_team_id: selectedTeam })
+        .update({ status: 'assigned', assigned_team_id: selectedTeam, assigned_member_id: selectedMember ?? null })
         .eq('id', taskId);
       if (error) throw error;
       // Attempt to notify team via API (best-effort)
@@ -50,7 +73,7 @@ export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props)
         await fetch('/api/notify-assignment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskId, teamId: selectedTeam }),
+          body: JSON.stringify({ taskId, teamId: selectedTeam, memberId: selectedMember ?? null }),
         });
       } catch (e) {
         // silently ignore notification failures but keep UX responsive
@@ -74,7 +97,7 @@ export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props)
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign Task to Team</DialogTitle>
+          <DialogTitle>Assign Task</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
           <label className="text-sm">Team</label>
@@ -89,6 +112,22 @@ export default function AssignTaskModal({ taskId, onAssigned, disabled }: Props)
             </SelectContent>
           </Select>
         </div>
+        {selectedTeam && (
+          <div className="space-y-2">
+            <label className="text-sm">Member (optional)</label>
+            <Select value={selectedMember} onValueChange={(v) => setSelectedMember(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder={members.length ? 'Select member' : 'No members found'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.user_id} value={m.user_id}>{m.user_id} {m.role !== 'member' ? `(${m.role})` : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <DialogFooter>
           <Button onClick={assign} disabled={!selectedTeam || loading}>
             {loading ? 'Assigning…' : 'Assign'}

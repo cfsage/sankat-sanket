@@ -15,9 +15,24 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import CameraCapture from './camera-capture';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
+import { useGeolocation } from '@/hooks/use-geolocation';
+import { enqueue } from '@/lib/offline-queue';
 
 // incident type options
 const incidentTypeOptions = ['Flood', 'Fire', 'Storm', 'Earthquake', 'Landslide', 'Other'] as const;
+const departmentOptions = ['Admin', 'Verified Organizations', 'Police', 'Fire Brigade', 'Medical/EMS', 'Municipal Services', 'Disaster Response', 'NGO'] as const;
+const departmentContacts: Record<(typeof departmentOptions)[number], string> = {
+  Admin: 'admin-demo@city.gov',
+  'Verified Organizations': 'verified-orgs-demo@org.example',
+  Police: 'police-demo@city.gov',
+  'Fire Brigade': 'fire-demo@city.gov',
+  'Medical/EMS': 'ems-demo@health.gov',
+  'Municipal Services': 'municipal-demo@city.gov',
+  'Disaster Response': 'disaster-demo@authority.gov',
+  NGO: 'ngo-demo@org.example',
+};
 
 // utils
 const fileToDataUri = (file: File) => new Promise<string>((resolve, reject) => {
@@ -37,6 +52,8 @@ const reportSchema = z.object({
   }),
   latitude: z.number({ required_error: 'Location is required.' }),
   longitude: z.number({ required_error: 'Location is required.' }),
+  notifyDepartment: z.array(z.enum(departmentOptions)).min(1, { message: 'Select at least one department.' }),
+  notifyContact: z.string().optional(),
 });
 
 // types
@@ -49,7 +66,10 @@ export default function ReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'fetching' | 'success' | 'error' | 'unsupported'>('idle');
+  const [liveTrackingEnabled, setLiveTrackingEnabled] = useState(false);
+  const [lastUpdateTs, setLastUpdateTs] = useState<number | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const { position, watching, startWatching, stopWatching } = useGeolocation();
 
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
@@ -57,6 +77,8 @@ export default function ReportForm() {
       incidentType: undefined,
       latitude: undefined,
       longitude: undefined,
+      notifyDepartment: [],
+      notifyContact: '',
     } as any,
   });
 
@@ -69,7 +91,8 @@ export default function ReportForm() {
     photoFileList && photoFileList.length === 1 &&
     incidentTypeVal &&
     typeof latVal === 'number' && !Number.isNaN(latVal) &&
-    typeof lngVal === 'number' && !Number.isNaN(lngVal)
+    typeof lngVal === 'number' && !Number.isNaN(lngVal) &&
+    Array.isArray(form.watch('notifyDepartment')) && (form.watch('notifyDepartment') as any[]).length > 0
   );
 
   // Manual geolocation fetch handler
@@ -102,6 +125,23 @@ export default function ReportForm() {
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
+
+  // Live geolocation: update form fields with realtime position
+  useEffect(() => {
+    if (!liveTrackingEnabled) return;
+    if (position) {
+      form.setValue('latitude', position.latitude);
+      form.setValue('longitude', position.longitude);
+      setLocationStatus('success');
+      setLastUpdateTs(Date.now());
+    }
+  }, [position, liveTrackingEnabled]);
+
+  useEffect(() => {
+    if (liveTrackingEnabled && !watching) startWatching();
+    if (!liveTrackingEnabled && watching) stopWatching();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveTrackingEnabled]);
 
   const onSubmit = async (data: ReportFormValues) => {
     setIsSubmitting(true);
@@ -165,8 +205,121 @@ export default function ReportForm() {
     );
   }
 
+  // Confirm and persist incident to Supabase
+  const [confirming, setConfirming] = useState(false);
+  const handleConfirm = async () => {
+    try {
+      setConfirming(true);
+      const photoFileList = form.getValues('photo') as FileList | undefined;
+      const incidentTypeVal = form.getValues('incidentType') as string | undefined;
+      const textDescriptionVal = form.getValues('textDescription') || '';
+      const latVal = form.getValues('latitude');
+      const lngVal = form.getValues('longitude');
+      const notifyDept = form.getValues('notifyDepartment') as (typeof departmentOptions)[number][];
+      const notifyContact = form.getValues('notifyContact') || '';
+
+      if (!photoFileList || photoFileList.length !== 1 || !incidentTypeVal || typeof latVal !== 'number' || typeof lngVal !== 'number') {
+        toast({ variant: 'destructive', title: 'Missing fields', description: 'Photo, type, and location are required.' });
+        return;
+      }
+
+      const offlineMode = !isSupabaseConfigured() || (typeof navigator !== 'undefined' && !navigator.onLine);
+      if (offlineMode) {
+        const file = photoFileList[0];
+        const photoDataUri = await fileToDataUri(file);
+        let audioDataUri: string | null = null;
+        const audioFiles = form.getValues('audio') as FileList | undefined;
+        if (audioFiles && audioFiles.length > 0) {
+          try { audioDataUri = await fileToDataUri(audioFiles[0]); } catch { audioDataUri = null; }
+        }
+        enqueue({
+          type: 'incident',
+          payload: {
+            status: 'unverified',
+            type: incidentTypeVal as string,
+            description: textDescriptionVal || null,
+            photoDataUri,
+            audioDataUri,
+            latitude: latVal as number,
+            longitude: lngVal as number,
+            notify_department: notifyDept && notifyDept.length ? JSON.stringify(notifyDept) : null,
+            notify_contact: notifyContact || null,
+          }
+        });
+        toast({ title: 'Saved offline', description: 'Your report will sync when back online.' });
+        handleReset();
+        return;
+      }
+
+      const supabase = getSupabaseClient();
+      const bucket = 'incident-photos';
+      const file = photoFileList[0];
+      const path = `reports/${crypto.randomUUID()}-${file.name}`;
+      const { error: uploadErr } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+      if (uploadErr) throw uploadErr;
+      const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
+
+      const { error: insertErr } = await supabase.from('incidents').insert({
+        status: 'unverified',
+        type: incidentTypeVal,
+        description: textDescriptionVal,
+        photo_url: pub.publicUrl,
+        latitude: latVal,
+        longitude: lngVal,
+        notify_department: notifyDept && notifyDept.length ? JSON.stringify(notifyDept) : null,
+        notify_contact: notifyContact || null,
+      });
+      if (insertErr) throw insertErr;
+
+      toast({ title: 'Incident saved', description: 'Your report was saved and alerts can be sent.' });
+      handleReset();
+    } catch (e: any) {
+      console.error('Confirm failed:', e);
+      // Fallback: enqueue offline for later sync
+      try {
+        const photoFileList = form.getValues('photo') as FileList | undefined;
+        const incidentTypeVal = form.getValues('incidentType') as string | undefined;
+        const textDescriptionVal = form.getValues('textDescription') || '';
+        const latVal = form.getValues('latitude');
+        const lngVal = form.getValues('longitude');
+        const notifyDept = form.getValues('notifyDepartment') as (typeof departmentOptions)[number][];
+        const notifyContact = form.getValues('notifyContact') || '';
+        if (photoFileList && photoFileList.length === 1 && incidentTypeVal && typeof latVal === 'number' && typeof lngVal === 'number') {
+          const photoDataUri = await fileToDataUri(photoFileList[0]);
+          let audioDataUri: string | null = null;
+          const audioFiles = form.getValues('audio') as FileList | undefined;
+          if (audioFiles && audioFiles.length > 0) {
+            try { audioDataUri = await fileToDataUri(audioFiles[0]); } catch { audioDataUri = null; }
+          }
+          enqueue({
+            type: 'incident',
+            payload: {
+              status: 'unverified',
+              type: incidentTypeVal as string,
+              description: textDescriptionVal || null,
+              photoDataUri,
+              audioDataUri,
+              latitude: latVal as number,
+              longitude: lngVal as number,
+              notify_department: notifyDept && notifyDept.length ? JSON.stringify(notifyDept) : null,
+              notify_contact: notifyContact || null,
+            }
+          });
+          toast({ title: 'Saved offline', description: 'We queued your report to sync later.' });
+          handleReset();
+        } else {
+          toast({ variant: 'destructive', title: 'Save failed', description: e?.message || 'Unknown error' });
+        }
+      } catch (err) {
+        toast({ variant: 'destructive', title: 'Save failed', description: e?.message || 'Unknown error' });
+      }
+    } finally {
+      setConfirming(false);
+    }
+  };
+
   if (analysisResult) {
-    return <AnalysisResults result={analysisResult} onReset={handleReset} />;
+    return <AnalysisResults result={analysisResult} onReset={handleReset} onConfirm={handleConfirm} confirming={confirming} />;
   }
 
   return (
@@ -285,8 +438,8 @@ export default function ReportForm() {
 
         {/* Manual location fetch */}
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <Button type="button" variant="outline" onClick={fetchLocation} disabled={locationStatus === 'fetching'}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <Button type="button" className="w-full sm:w-auto" variant="outline" onClick={fetchLocation} disabled={locationStatus === 'fetching'}>
               {locationStatus === 'fetching' ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching Location...
@@ -295,22 +448,86 @@ export default function ReportForm() {
                 <>Fetch Current Location</>
               )}
             </Button>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground sm:ml-2">
               {locationStatus === 'idle' && 'Location not fetched yet.'}
               {locationStatus === 'success' && 'Location fetched.'}
               {locationStatus === 'error' && 'Failed to fetch location.'}
               {locationStatus === 'unsupported' && 'Geolocation unsupported.'}
             </span>
           </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input className="h-5 w-5" type="checkbox" checked={liveTrackingEnabled} onChange={(e) => setLiveTrackingEnabled(e.target.checked)} />
+              <span>Live location (auto-update)</span>
+            </label>
+            {liveTrackingEnabled && (
+              <span className="text-xs text-muted-foreground sm:ml-2">{position ? `Tracking: ~${Math.round(Number(position.accuracy ?? 0))}m • Updated ${lastUpdateTs ? new Date(lastUpdateTs).toLocaleTimeString() : '—'}` : 'Starting...'}</span>
+            )}
+          </div>
           {/* Hidden geolocation inputs bound to form */}
           <input type="hidden" {...form.register('latitude', { valueAsNumber: true })} />
           <input type="hidden" {...form.register('longitude', { valueAsNumber: true })} />
         </div>
 
+        {/* Who to notify & contact (mandatory department; optional contact) */}
+        <div className="space-y-3">
+          <FormLabel>Who to notify</FormLabel>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="notifyDepartment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">Department</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      {departmentOptions.map((opt) => (
+                        <label key={opt} className="flex items-center gap-2 text-xs cursor-pointer">
+                          <Checkbox
+                            checked={Array.isArray(field.value) && field.value.includes(opt)}
+                            onCheckedChange={(checked) => {
+                              const current = Array.isArray(field.value) ? field.value.slice() : [];
+                              const set = new Set(current);
+                              if (checked) {
+                                set.add(opt);
+                              } else {
+                                set.delete(opt);
+                              }
+                              const next = Array.from(set);
+                              field.onChange(next);
+                              const autoContact = next.map((d) => departmentContacts[d as keyof typeof departmentContacts]).join('; ');
+                              form.setValue('notifyContact', autoContact, { shouldDirty: true });
+                            }}
+                          />
+                          <span>{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notifyContact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">Contact (phone/email/notes)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contact or notes" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <div className="flex justify-end gap-4">
           <Button type="submit" size="lg" disabled={!isReady}>
             <Upload className="mr-2 h-4 w-4" />
-            Analyze Report
+            Submit Report
           </Button>
         </div>
       </form>

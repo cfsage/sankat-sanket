@@ -13,6 +13,8 @@ export type Incident = {
   photo_url: string | null;
   latitude: number;
   longitude: number;
+  notify_department?: string | null;
+  notify_contact?: string | null;
 };
 
 export function useIncidentsRealtime() {

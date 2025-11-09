@@ -7,11 +7,25 @@ import LiveMapClient from "@/components/dashboard/live-map-client";
 import React from "react";
 import IncidentsList from "@/components/dashboard/incidents-list";
 import TasksList from "@/components/dashboard/tasks-list";
+import OrgVerificationBanner from "@/components/dashboard/org-verification-banner";
+import QuickActions from "@/components/dashboard/quick-actions";
+import AlertsPanel from "@/components/dashboard/alerts-panel";
 
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 h-full">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <OrgVerificationBanner />
+      <QuickActions />
+      <Card>
+        <CardHeader>
+          <CardTitle>Alerts</CardTitle>
+          <CardDescription>Realtime warnings and push notifications.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertsPanel />
+        </CardContent>
+      </Card>
+  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Active Incidents"
           value={incidents.length.toString()}
@@ -32,12 +46,12 @@ export default function DashboardPage() {
           className="bg-accent text-accent-foreground"
         />
       </div>
-      <Card className="flex-1 min-h-[500px] lg:min-h-0">
+      <Card className="flex-1">
         <CardHeader>
           <CardTitle>Live Threat & Resource Map</CardTitle>
           <CardDescription>Real-time view of incidents and available aid.</CardDescription>
         </CardHeader>
-        <CardContent className="h-[calc(100%-6rem)] pb-0">
+        <CardContent className="pb-0">
           <LiveMapClient className="h-full w-full rounded-lg overflow-hidden" />
         </CardContent>
       </Card>

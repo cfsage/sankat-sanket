@@ -9,6 +9,7 @@ export type Task = {
   incident_id: string;
   status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
   assigned_team_id: string | null;
+  assigned_member_id: string | null;
   title: string | null;
   notes: string | null;
 };

@@ -10,9 +10,11 @@ import { ScrollArea } from '../ui/scroll-area';
 interface AnalysisResultsProps {
   result: AnalysisResultData;
   onReset: () => void;
+  onConfirm?: () => Promise<void> | void;
+  confirming?: boolean;
 }
 
-export default function AnalysisResults({ result, onReset }: AnalysisResultsProps) {
+export default function AnalysisResults({ result, onReset, onConfirm, confirming }: AnalysisResultsProps) {
   const { analysis, matches } = result;
 
   return (
@@ -105,9 +107,16 @@ export default function AnalysisResults({ result, onReset }: AnalysisResultsProp
         <p className="text-sm text-muted-foreground">This report will be sent to nearby residents, volunteers, and authorities.</p>
         <div className="flex gap-4">
             <Button variant="outline" onClick={onReset}>Create New Report</Button>
-            <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                <Send className="mr-2 h-4 w-4" />
-                Confirm and Broadcast Alerts
+            <Button size="lg" className="bg-green-600 hover:bg-green-700" onClick={onConfirm} disabled={confirming}>
+                {confirming ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" /> Confirm and Broadcast Alerts
+                  </>
+                )}
             </Button>
         </div>
       </div>

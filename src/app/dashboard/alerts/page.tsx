@@ -62,7 +62,7 @@ export default function AlertsPage() {
                   {iconMap[alert.type as keyof typeof iconMap] || iconMap.Default}
                 </div>
                 <div className="flex-1">
-                    <div className="flex justify-between items-baseline">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1">
                         <h4 className="font-semibold">{alert.title}</h4>
                         <AlertTimestamp timestamp={alert.timestamp} />
                     </div>

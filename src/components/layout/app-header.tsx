@@ -19,8 +19,9 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Logo } from '../icons';
-import { LogOut, Settings, User, LogIn } from 'lucide-react';
+import { LogOut, Settings, User, LogIn, ShieldCheck } from 'lucide-react';
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
+import { useUserRole } from '@/hooks/use-user-role';
 
 export default function AppHeader() {
   const { isMobile } = useSidebar();
@@ -35,6 +36,7 @@ export default function AppHeader() {
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const { role } = useUserRole();
 
   useEffect(() => {
     if (!supabase) return;
@@ -102,6 +104,14 @@ export default function AppHeader() {
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </DropdownMenuItem>
+          {role === 'admin' && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>Admin</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {userId ? (
             <DropdownMenuItem onClick={signOut}>
