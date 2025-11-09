@@ -4,8 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Sahayata",
-  description: "Community-driven climate resilience network in Nepal.",
+  title: "Sankat Sanket",
+  description: "From a voice in the dark — to a task in a hand.",
 };
 
 export default function RootLayout({
@@ -15,7 +15,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+      <body className={cn("antialiased", process.env.NEXT_PUBLIC_TAILWIND_THEME ?? "")}
+            suppressHydrationWarning>
         {children}
         <Toaster />
       </body>

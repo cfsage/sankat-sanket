@@ -4,7 +4,7 @@
 
 - Multimedia Report Upload: Allow users to upload reports with photos, audio, geolocation, and text descriptions to signal a climate threat.
 - Client-Side AI Triage: Employ on-device AI using TensorFlow.js, Essentia.js or Vosk, spaCy.js or Compromise and YOLOv8 to analyze uploaded media and automatically detect potential climate threats and extract essential needs from the data. Output a confidence score.
-- Personalized Push Alerts: Send personalized and inclusive push notifications via Firebase Cloud Messaging (FCM) to alert nearby residents, registered volunteers, and simulated authorities about detected threats and urgent needs.
+- Personalized Push Alerts: Send inclusive push notifications to alert nearby residents, registered volunteers, and simulated authorities about detected threats and urgent needs.
 - Volunteer Pledge System: Establish a system where individuals, hotels, and restaurants can pledge resources like food, shelter, transport, and skills. The AI will then tool auto-match these pledges to verified needs, prioritizing by urgency and proximity, as derived by media uploaded by other users.
 - Map Dashboard: Create a map dashboard using Leaflet.js and OpenStreetMap to visualize real-time reports and available pledges, providing an overview of the situation.
 - Offline Mode: Implement offline functionality using Workbox and IndexedDB to allow users to submit reports and view available pledges even without an active internet connection.

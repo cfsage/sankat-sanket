@@ -1,17 +1,14 @@
 
-'use client';
-
 import { HandHeart, Siren, Users } from "lucide-react";
 import { incidents, pledges } from "@/lib/data";
 import StatCard from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import LiveMapClient from "@/components/dashboard/live-map-client";
 import React from "react";
-import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import IncidentsList from "@/components/dashboard/incidents-list";
+import TasksList from "@/components/dashboard/tasks-list";
 
 export default function DashboardPage() {
-  const mapFallbackImage = PlaceHolderImages.find(p => p.id === "map-fallback");
-
   return (
     <div className="flex flex-col gap-6 h-full">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -38,25 +35,28 @@ export default function DashboardPage() {
       <Card className="flex-1 min-h-[500px] lg:min-h-0">
         <CardHeader>
           <CardTitle>Live Threat & Resource Map</CardTitle>
-          <CardDescription>Real-time view of incidents and available aid. (Map Temporarily Unavailable)</CardDescription>
+          <CardDescription>Real-time view of incidents and available aid.</CardDescription>
         </CardHeader>
         <CardContent className="h-[calc(100%-6rem)] pb-0">
-            <div className="h-full w-full rounded-lg overflow-hidden relative bg-muted flex items-center justify-center">
-              {mapFallbackImage && (
-                <Image
-                  src={mapFallbackImage.imageUrl}
-                  alt={mapFallbackImage.description}
-                  fill
-                  className="object-cover"
-                  data-ai-hint={mapFallbackImage.imageHint}
-                />
-              )}
-              <div className="absolute inset-0 bg-background/50"></div>
-              <div className="relative z-10 text-center p-4 rounded-lg bg-card/80">
-                  <h3 className="text-xl font-semibold">Map is Currently Unavailable</h3>
-                  <p className="text-muted-foreground">We are working on improving the map experience.</p>
-              </div>
-            </div>
+          <LiveMapClient className="h-full w-full rounded-lg overflow-hidden" />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Incidents</CardTitle>
+          <CardDescription>Manage and verify reported incidents.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <IncidentsList />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Tasks</CardTitle>
+          <CardDescription>Track assignments and progress.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TasksList />
         </CardContent>
       </Card>
     </div>

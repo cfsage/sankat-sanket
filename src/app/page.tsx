@@ -25,10 +25,10 @@ export default function Home() {
 
       <div className="relative z-10 flex flex-col items-center text-center text-foreground">
         <h1 className="font-headline text-5xl font-bold tracking-tighter md:text-7xl">
-          Sahayata
+          Sankat Sanket
         </h1>
         <p className="mt-4 max-w-2xl text-lg md:text-xl">
-          Community-driven climate resilience network in Nepal.
+          From a voice in the dark — to a task in a hand.
         </p>
         <p className="mt-6 max-w-3xl text-muted-foreground">
           A real-time platform for communities to report climate threats, alert those in danger, and match volunteer aid with verified needs, creating a faster, more inclusive, and resilient response network.

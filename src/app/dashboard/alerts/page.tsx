@@ -44,7 +44,7 @@ export default function AlertsPage() {
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
-            Recent alerts and updates from the Sahayata network.
+            Recent alerts and updates from the Sankat Sanket network.
           </CardDescription>
         </CardHeader>
         <CardContent>

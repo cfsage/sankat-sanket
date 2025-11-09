@@ -26,7 +26,7 @@ export default function ProfileForm() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "Demo User",
-      email: "user@sahayata.org",
+      email: "user@sankatsanket.org",
       bio: "A passionate community volunteer dedicated to climate resilience and helping others in need.",
     }
   });
